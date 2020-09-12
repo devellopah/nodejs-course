@@ -1,9 +1,25 @@
-require('dotenv').config()
-const request = require('postman-request')
+const dotenv = require('dotenv')
+const axios = require('axios')
 
-const url = `https://api.darksky.net/forecast/${process.env.DARK_SKY_API}/37.8267,-122.4233`
+dotenv.config()
 
-request({url}, (error, response) => {
-  const data = JSON.parse(response.body)
-  console.log('currently', data.currently)
-})
+async function getLocation() {
+  try {
+    const response = await axios.get(`https://ipinfo.io?token=${process.env.IPINFO_API_KEY}`)
+    return response.data.loc
+  } catch (error) {
+    console.log('Unable to find your location!')
+  }
+}
+
+async function getWeather() {
+  const loc = await getLocation()
+  try {
+    const response = await axios.get(`https://api.darksky.net/forecast/${process.env.DARKSKY_API_KEY}/${loc}`)
+    console.log(response.data.currently)
+  } catch(error) {
+    console.log('Unable to connect to weather!')
+  }
+}
+
+getWeather()
